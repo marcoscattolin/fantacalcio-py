@@ -1,4 +1,4 @@
-from src.data_proc import DataProcessor
+from src.commons.data_proc import DataProcessor
 from loguru import logger
 import pandas as pd
 from src import config

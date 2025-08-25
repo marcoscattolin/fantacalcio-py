@@ -7,41 +7,9 @@ This module handles loading, processing, and cleaning of data from FPEDIA and FS
 
 import pandas as pd
 from loguru import logger
-from typing import Tuple, List, Dict, Optional
+from typing import List
 from pathlib import Path
 from src import config
-
-
-# Constants for column names and processing
-class ColumnNames:
-    """Constants for column names used across different data sources."""
-    
-    # FPEDIA columns
-    FPEDIA_NUMERIC_COLS = [
-        f"Fantamedia anno {config.ANNO_CORRENTE-2}-{config.ANNO_CORRENTE-1}",
-        "Partite giocate",
-        f"Fantamedia anno {config.ANNO_CORRENTE-1}-{config.ANNO_CORRENTE}",
-        "Presenze campionato corrente",
-        "Punteggio",
-        "Nuovo acquisto",
-        "Buon investimento",
-        "Consigliato prossima giornata",
-        "Resistenza infortuni",
-    ]
-    
-    # FSTATS columns (original names)
-    FSTATS_ORIGINAL_COLS = [
-        "name", "team", "fantacalcioPosition", "appearances", "pagella",
-        "fantacalcioRanking", "goals", "assists", "yellowCards", "redCards",
-        "xgFromOpenPlays", "xA", "fantacalcioFantaindex"
-    ]
-    
-    # FSTATS columns (renamed)
-    FSTATS_RENAMED_COLS = [
-        "Nome", "Squadra", "Ruolo", "presences", "avg", "fanta_avg",
-        "goals", "assists", "yellowCards", "redCards", "xgFromOpenPlays",
-        "xA", "fantacalcioFantaindex"
-    ]
 
 
 class DataProcessor:
