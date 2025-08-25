@@ -2,13 +2,12 @@
 import os
 import base64
 
-
 def decode(stringa):
     return base64.b64decode(stringa).decode("utf-8")
 
 
 # Percorsi dei file
-DATA_DIR = "data"
+DATA_DIR = os.path.join("..", "data")
 OUTPUT_DIR = os.path.join(DATA_DIR, "output")
 GIOCATORI_URLS_FILE = os.path.join(DATA_DIR, "giocatori_urls.txt")
 GIOCATORI_CSV = os.path.join(DATA_DIR, "_giocatori.csv")
