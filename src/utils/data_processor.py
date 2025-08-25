@@ -9,7 +9,7 @@ import pandas as pd
 from loguru import logger
 from typing import Tuple, List, Dict, Optional
 from pathlib import Path
-import config
+from src import config
 
 
 # Constants for column names and processing
@@ -57,30 +57,7 @@ class DataProcessor:
             "fantacalcioRanking": "fanta_avg",
         }
     
-    def load_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Load CSV files into pandas DataFrames with error handling.
-        
-        Returns:
-            Tuple containing (fpedia_df, fstats_df)
-        """
-        logger.info("Starting data loading process...")
-        
-        df_fpedia = self._load_single_dataframe(
-            config.GIOCATORI_CSV, 
-            "FPEDIA", 
-            sep=","
-        )
-        df_fstats = self._load_single_dataframe(
-            config.PLAYERS_CSV, 
-            "FSTATS", 
-            sep=";"
-        )
-        
-        logger.info("Data loading completed")
-        return df_fpedia, df_fstats
-    
-    def _load_single_dataframe(
+    def _load_dataframe(
         self, 
         file_path: str, 
         source_name: str, 
@@ -129,6 +106,55 @@ class DataProcessor:
         """
         return file_path.exists() and file_path.stat().st_size > 0
     
+    def _process_numeric_columns(self, df: pd.DataFrame, numeric_cols: List[str]) -> pd.DataFrame:
+        """
+        Convert specified columns to numeric type with error handling.
+        
+        Args:
+            df: Input DataFrame
+            numeric_cols: List of column names to convert
+            
+        Returns:
+            DataFrame with processed numeric columns
+        """
+        for col in numeric_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+            else:
+                logger.warning(f"Column '{col}' not found. Creating with default value 0.")
+                df[col] = 0
+        
+        return df
+    
+    def _process_skills_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Process the Skills column, ensuring it exists and has valid values.
+        
+        Args:
+            df: Input DataFrame
+            
+        Returns:
+            DataFrame with processed Skills column
+        """
+        if "Skills" not in df.columns:
+            df["Skills"] = "[]"
+        else:
+            df["Skills"] = df["Skills"].fillna("[]")
+        
+        return df
+    
+    def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Rename columns according to the predefined mapping.
+        
+        Args:
+            df: Input DataFrame
+            
+        Returns:
+            DataFrame with renamed columns
+        """
+        return df.rename(columns=self.rename_map)
+
     def process_fpedia_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process and clean FPEDIA DataFrame.
@@ -180,56 +206,29 @@ class DataProcessor:
         except Exception as e:
             logger.error(f"Error processing FSTATS data: {e}")
             return df
-    
-    def _process_numeric_columns(self, df: pd.DataFrame, numeric_cols: List[str]) -> pd.DataFrame:
-        """
-        Convert specified columns to numeric type with error handling.
-        
-        Args:
-            df: Input DataFrame
-            numeric_cols: List of column names to convert
-            
-        Returns:
-            DataFrame with processed numeric columns
-        """
-        for col in numeric_cols:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
-            else:
-                logger.warning(f"Column '{col}' not found. Creating with default value 0.")
-                df[col] = 0
-        
-        return df
-    
-    def _process_skills_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process the Skills column, ensuring it exists and has valid values.
-        
-        Args:
-            df: Input DataFrame
-            
-        Returns:
-            DataFrame with processed Skills column
-        """
-        if "Skills" not in df.columns:
-            df["Skills"] = "[]"
-        else:
-            df["Skills"] = df["Skills"].fillna("[]")
-        
-        return df
-    
-    def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Rename columns according to the predefined mapping.
-        
-        Args:
-            df: Input DataFrame
-            
-        Returns:
-            DataFrame with renamed columns
-        """
-        return df.rename(columns=self.rename_map)
 
+    def load_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+            """
+            Load CSV files into pandas DataFrames with error handling.
+            
+            Returns:
+                Tuple containing (fpedia_df, fstats_df)
+            """
+            logger.info("Starting data loading process...")
+            
+            df_fpedia = self._load_dataframe(
+                config.GIOCATORI_CSV, 
+                "FPEDIA", 
+                sep=","
+            )
+            df_fstats = self._load_dataframe(
+                config.PLAYERS_CSV, 
+                "FSTATS", 
+                sep=";"
+            )
+            
+            logger.info("Data loading completed")
+            return df_fpedia, df_fstats
 
 if __name__ == "__main__":
     

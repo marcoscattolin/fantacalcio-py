@@ -3,9 +3,13 @@ import os
 from loguru import logger
 import pandas as pd
 
-import data_retriever
-import data_processor
-import convenienza_calculator
+
+from scrapers.fstats import Scraper as FStatsScraper
+from scrapers.fpedia import Scraper as FpediaScraper
+
+
+from utils.data_processor import DataProcessor
+from utils.convenienza_calculator import calcola_convenienza_fpedia, calcola_convenienza_fstats
 import config
 
 
@@ -21,13 +25,17 @@ def main():
     logger.info("Starting Fantacalcio analysis pipeline...")
 
     # 1. Retrieve all data
-    logger.info("Step 1: Retrieving data from all sources...")
-    data_retriever.scrape_fpedia()
-    data_retriever.scrape_fstats()
+    logger.info("Step 1: Retrieving data from FPEDIA...")
+    fpedia_scraper = FpediaScraper()
+    fpedia_scraper.scrape()
+
+    logger.info("Step 2: Retrieving data from FSTATS...")
+    fstats_scraper = FStatsScraper()
+    fstats_scraper.scrape()
     logger.info("Data retrieval complete.")
 
     # 2. Load dataframes
-    df_fpedia, df_fstats = data_processor.load_dataframes()
+    df_fpedia, df_fstats = DataProcessor.load_dataframes()
 
     # --- Pipeline for FPEDIA ---
     if not df_fpedia.empty:
