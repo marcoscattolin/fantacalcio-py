@@ -23,11 +23,11 @@ def main():
     # 1. Retrieve all data
     logger.info("Step 1: Retrieving data from all sources...")
     data_retriever.scrape_fpedia()
-    data_retriever.fetch_FSTATS_data()
+    data_retriever.scrape_fstats()
     logger.info("Data retrieval complete.")
 
     # 2. Load dataframes
-    df_fpedia, df_FSTATS = data_processor.load_dataframes()
+    df_fpedia, df_fstats = data_processor.load_dataframes()
 
     # --- Pipeline for FPEDIA ---
     if not df_fpedia.empty:
@@ -87,11 +87,11 @@ def main():
         logger.warning("FPEDIA DataFrame is empty. Pipeline skipped.")
 
     # --- Pipeline for FSTATS ---
-    if not df_FSTATS.empty:
+    if not df_fstats.empty:
         logger.info("--- Starting FSTATS Pipeline ---")
 
-        df_processed = data_processor.process_FSTATS_data(df_FSTATS)
-        df_final = convenienza_calculator.calcola_convenienza_FSTATS(df_processed)
+        df_processed = data_processor.process_fstats_data(df_fstats)
+        df_final = convenienza_calculator.calcola_convenienza_fstats(df_processed)
 
         df_final = df_final.sort_values(by="Convenienza Potenziale", ascending=False)
 

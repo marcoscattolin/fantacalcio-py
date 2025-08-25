@@ -123,7 +123,7 @@ def calcola_convenienza_fpedia(df: pd.DataFrame) -> pd.DataFrame:
 # --- Funzioni per FSTATS ---
 
 
-def calcola_convenienza_FSTATS(df: pd.DataFrame) -> pd.DataFrame:
+def calcola_convenienza_fstats(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calcola due indici di convenienza per i dati di FSTATS:
     1. 'Convenienza': basata sulle performance stagionali (presenze, fantamedia).

@@ -1,9 +1,6 @@
 # data_retriever.py
 """
-Data retrieval module for Fantacalcio analysis.
-
-This module handles scraping data from FPEDIA and fetching data from FSTATS API.
-It provides classes for different data sources and utilities for data processing.
+This module handles scraping data from FPEDIA website.
 """
 
 import os
@@ -11,7 +8,6 @@ import time
 from random import randint
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,7 +17,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import concurrent.futures
 
-import config
+from src import config
 
 load_dotenv()
 
@@ -46,7 +42,7 @@ class PlayerAttributes:
     presenze_campionato_corrente: str
 
 
-class FPEDIAScraper:
+class Scraper:
     """Handles scraping operations from FPEDIA website."""
     
     def __init__(self, max_workers: int = config.MAX_WORKERS):
@@ -55,7 +51,7 @@ class FPEDIAScraper:
         self.session.headers.update(config.HEADERS)
         self.session.verify = False
      
-    def _extract_fantamedia_data(self, soup: BeautifulSoup) -> Dict[str, str]:
+    def _extract_fantamedia(self, soup: BeautifulSoup) -> Dict[str, str]:
         """Extract fantamedia data for different years."""
         selettore = "div.col_one_fourth:nth-of-type(n+2) div"
         elements = soup.select(selettore)
@@ -71,7 +67,7 @@ class FPEDIAScraper:
         
         return fantamedia_data
     
-    def _extract_stats_data(self, soup: BeautifulSoup, selettore: str) -> Dict[str, str]:
+    def _extract_stats(self, soup: BeautifulSoup, selettore: str) -> Dict[str, str]:
         """Extract statistics data from a specific selector."""
         stats_element = soup.select_one(selettore)
         if not stats_element:
@@ -88,7 +84,7 @@ class FPEDIAScraper:
         
         return dict(zip(parametri, valori))
     
-    def _extract_boolean_attribute(self, soup: BeautifulSoup, selettore: str, 
+    def _extract_boolean(self, soup: BeautifulSoup, selettore: str, 
                                  title_contains: str, default: bool = False) -> bool:
         """Extract boolean attribute based on title content."""
         try:
@@ -163,7 +159,7 @@ class FPEDIAScraper:
         logger.debug(f"{len(all_urls)} player URLs saved.")
         return all_urls
 
-    def _scrape_player_attributes(self, url: str) -> Optional[Dict[str, Any]]:
+    def _scrape_attributes(self, url: str) -> Optional[Dict[str, Any]]:
         """Scrape attributes for a single player."""
         logger.debug(f"Scraping attributes for player from URL: {url}")
         
@@ -187,16 +183,16 @@ class FPEDIAScraper:
             punteggio_element = soup.select_one("div.col_one_fourth:nth-of-type(1) span.stickdan")
             punteggio = punteggio_element.text.strip().replace("/100", "") if punteggio_element else "0"
             
-            # Extract fantamedia data
-            fantamedia_anni = self._extract_fantamedia_data(soup)
+            # Extract fantamedia
+            fantamedia_anni = self._extract_fantamedia(soup)
             
             # Extract last year stats
-            stats_ultimo_anno = self._extract_stats_data(
+            stats_ultimo_anno = self._extract_stats(
                 soup, "div.col_one_third:nth-of-type(2) div"
             )
             
             # Extract predicted stats
-            stats_previste = self._extract_stats_data(
+            stats_previste = self._extract_stats(
                 soup, ".col_one_third.col_last div"
             )
             
@@ -218,13 +214,13 @@ class FPEDIAScraper:
                 resistenza_infortuni = progress_elements[3].text.replace("%", "")
             
             # Extract boolean attributes
-            consigliato = self._extract_boolean_attribute(
+            consigliato = self._extract_boolean(
                 soup, "img.inf_calc", "Consigliato per la giornata"
             )
             
             nuovo_acquisto = bool(soup.select_one("span.new_calc"))
             
-            infortunato = self._extract_boolean_attribute(
+            infortunato = self._extract_boolean(
                 soup, "img.inf_calc", "Infortunato"
             )
             
@@ -272,7 +268,7 @@ class FPEDIAScraper:
             logger.error(f"Error scraping player attributes from {url}: {e}")
             return None
     
-    def scrape_players(self) -> List[Dict[str, Any]]:
+    def _scrape_players(self) -> List[Dict[str, Any]]:
         """Scrape attributes for all players."""
         urls = self._get_player_urls()
         if not urls:
@@ -283,7 +279,7 @@ class FPEDIAScraper:
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             future_to_url = {
-                executor.submit(self._scrape_player_attributes, url): url 
+                executor.submit(self._scrape_attributes, url): url 
                 for url in urls
             }
             
@@ -303,129 +299,30 @@ class FPEDIAScraper:
         return giocatori
 
 
-class FSTATSScraper:
-    """Handles data retrieval from FSTATS API."""
-    
-    def __init__(self):
-        self.session = requests.Session()
-        self.session.verify = False
-        self.token = None
-    
-    def _get_credentials(self) -> tuple[Optional[str], Optional[str]]:
-        """Get FSTATS credentials from environment variables."""
-        user = os.getenv("FSTATS_MAIL")
-        password = os.getenv("FSTATS_PASSWORD")
-        
-        if not user or not password:
-            logger.error("FSTATS credentials not found in .env file.")
-            return None, None
-        
-        return user, password
-    
-    def _login(self) -> bool:
-        """Login to FSTATS and get access token."""
-        user, password = self._get_credentials()
-        if not user or not password:
-            return False
-        
-        logger.debug("Logging into FSTATS...")
-        login_payload = {"username": user, "password": password}
-        headers = {"content-type": "application/json"}
-        
-        try:
-            response = self.session.post(
-                config.FSTATS_LOGIN_URL, 
-                json=login_payload, 
-                headers=headers
-            )
-            response.raise_for_status()
-            self.token = response.json()["access_token"]
-            logger.debug("Login successful.")
-            return True
-        except requests.exceptions.RequestException as e:
-            logger.error(f"FSTATS login failed: {e}")
-            return False
-    
-    def scrape_players(self) -> Optional[List[Dict[str, Any]]]:
-        """Scrape player data from FSTATS API."""
-        if not self.token:
-            logger.error("Not logged in to FSTATS. Please login first.")
-            return None
-        
-        logger.debug("Scraping player data from FSTATS API...")
-        auth_headers = {"authorization": f"Bearer {self.token}"}
-        
-        try:
-            response = self.session.get(
-                config.FSTATS_PLAYERS_URL, 
-                headers=auth_headers
-            )
-            response.raise_for_status()
-            players_data = response.json()["results"]
-            logger.debug("FSTATS data scraped successfully.")
-            return players_data
-        except requests.exceptions.RequestException as e:
-            logger.error(f"FSTATS data scrape failed: {e}")
-            return None
-
-
-class DataRetriever:
-    """Main class for orchestrating data retrieval operations."""
-    
-    def __init__(self, max_workers: int = config.MAX_WORKERS):
-        self.fpedia_scraper = FPEDIAScraper(max_workers)
-        self.fstats_scraper = FSTATSScraper()
-    
-    def scrape_fpedia(self) -> None:
-        """
-        Orchestrates the scraping of FPEDIA.
-        Fetches all player URLs and then scrapes each player's page for their attributes.
-        Saves the data to a CSV file.
-        """
-        if os.path.exists(config.GIOCATORI_CSV):
-            logger.debug(f"{config.GIOCATORI_CSV} already exists. Skipping scraping.")
-            return
-        
-        giocatori = self.fpedia_scraper.scrape_players()
-        
-        if giocatori:
-            # Ensure output directory exists
-            os.makedirs(os.path.dirname(config.GIOCATORI_CSV), exist_ok=True)
+    def scrape(self) -> None:
+            """
+            Fetches all player URLs and then scrapes each player's page for their attributes.
+            Saves the data to a CSV file.
+            """
+            if os.path.exists(config.GIOCATORI_CSV):
+                logger.debug(f"{config.GIOCATORI_CSV} already exists. Skipping scraping.")
+                return
             
-            df = pd.DataFrame(giocatori)
-            df.to_csv(config.GIOCATORI_CSV, index=False)
-            logger.debug(f"FPEDIA data saved to CSV: {len(giocatori)} players")
-        else:
-            logger.warning("No player data was scraped from FPEDIA.")
-    
-    def scrape_fstats(self) -> None:
-        """
-        Logs into FSTATS, fetches player data from the API,
-        and saves it to a CSV file.
-        """
-        if os.path.exists(config.PLAYERS_CSV):
-            logger.debug(f"{config.PLAYERS_CSV} already exists. Skipping scraping.")
-            return
-        
-        if not self.fstats_scraper._login():
-            return
-        
-        players_data = self.fstats_scraper.scrape_players()
-        
-        if players_data:
-            # Ensure output directory exists
-            os.makedirs(os.path.dirname(config.PLAYERS_CSV), exist_ok=True)
+            giocatori = self._scrape_players()
             
-            df = pd.DataFrame(players_data)
-            df.to_csv(config.PLAYERS_CSV, index=False, sep=";")
-            logger.debug(f"FSTATS data saved to CSV: {len(players_data)} players")
-        else:
-            logger.warning("No player data was scraped from FSTATS.")
+            if giocatori:
+                # Ensure output directory exists
+                os.makedirs(os.path.dirname(config.GIOCATORI_CSV), exist_ok=True)
+                
+                df = pd.DataFrame(giocatori)
+                df.to_csv(config.GIOCATORI_CSV, index=False)
+                logger.debug(f"FPEDIA data saved to CSV: {len(giocatori)} players")
+            else:
+                logger.warning("No player data was scraped from FPEDIA.")
     
-
+    
 
 if __name__ == "__main__":
     # Example usage
-    retriever = DataRetriever()
-    retriever.scrape_fpedia()
-    retriever.scrape_fstats()
+    scraper = Scraper()
+    scraper.scrape()
