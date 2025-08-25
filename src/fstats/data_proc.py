@@ -4,19 +4,6 @@ import pandas as pd
 from src import config
 
 
- # FSTATS columns (original names)
-ORIGINAL_COLS = [
-        "name", "team", "fantacalcioPosition", "appearances", "pagella",
-        "fantacalcioRanking", "goals", "assists", "yellowCards", "redCards",
-        "xgFromOpenPlays", "xA", "fantacalcioFantaindex"
-    ]
-    
-RENAMED_COLS = [
-        "Nome", "Squadra", "Ruolo", "presences", "avg", "fanta_avg",
-        "goals", "assists", "yellowCards", "redCards", "xgFromOpenPlays",
-        "xA", "fantacalcioFantaindex"
-    ]
-
 class FstatsDataProcessor(DataProcessor):
 
     def load_dataframe(self) -> pd.DataFrame:
@@ -38,6 +25,59 @@ class FstatsDataProcessor(DataProcessor):
         logger.info("Data loading completed")
         return df
 
+    def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Rename columns according to the predefined mapping.
+        
+        Args:
+            df: Input DataFrame
+            
+        Returns:
+            DataFrame with renamed columns
+        """
+
+        # Rename columns for clarity and consistency
+        rename_map = {
+            "name": "Nome",
+            "team": "Squadra",
+            "fantacalcioPosition": "Ruolo",  # Using the specific fantacalcio role
+            "appearances": "presences",
+            "pagella": "avg",
+            "fantacalcioRanking": "fanta_avg",
+        }
+        df = df.rename(columns=rename_map)
+
+        return df
+
+    def _process_numeric_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        
+        # Define the list of columns that should be numeric, using the NEW names
+        numeric_cols = [
+            "goals",
+            "assists",
+            "yellowCards",
+            "redCards",
+            "xgFromOpenPlays",
+            "xA",
+            "presences",
+            "avg",
+            "fanta_avg",
+            "fantacalcioFantaindex",
+        ]
+
+        for col in numeric_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+            else:
+                # This warning should now only appear for genuinely missing columns
+                logger.warning(
+                    f"Column '{col}' not found in FSTATS data. It will be created with value 0."
+                )
+        
+        return df
+
+
+
     def process_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process and clean FSTATS DataFrame.
@@ -56,7 +96,7 @@ class FstatsDataProcessor(DataProcessor):
         
         try:
             df = self._rename_columns(df)
-            df = self._process_numeric_columns(df, RENAMED_COLS)
+            df = self._process_numeric_columns(df)
             
             logger.info(f"FSTATS data processed successfully. Shape: {df.shape}")
             return df

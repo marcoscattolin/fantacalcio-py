@@ -15,16 +15,6 @@ from src import config
 class DataProcessor:
     """Main class for processing data from different sources."""
     
-    def __init__(self):
-        self.rename_map = {
-            "name": "Nome",
-            "team": "Squadra",
-            "fantacalcioPosition": "Ruolo",
-            "appearances": "presences",
-            "pagella": "avg",
-            "fantacalcioRanking": "fanta_avg",
-        }
-    
     def _load_dataframe(
         self, 
         file_path: str, 
@@ -111,14 +101,3 @@ class DataProcessor:
         
         return df
     
-    def _rename_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Rename columns according to the predefined mapping.
-        
-        Args:
-            df: Input DataFrame
-            
-        Returns:
-            DataFrame with renamed columns
-        """
-        return df.rename(columns=self.rename_map)

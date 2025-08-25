@@ -19,8 +19,8 @@ def main():
     scraper.scrape()
     
     data_processor = DataProcessor()
-    df_processed = data_processor.load_dataframe()
-    df_processed = data_processor.process_data(df_processed)
+    raw_df = data_processor.load_dataframe()
+    df_processed = data_processor.process_data(raw_df)
     
     df = calcola_convenienza(df_processed)
     df = df.sort_values(by="Convenienza Potenziale", ascending=False)
@@ -114,7 +114,7 @@ def main():
     output_path = os.path.join(config.OUTPUT_DIR, "fstats_analysis.xlsx")
     df[final_columns].to_excel(output_path, index=False)
 
-    logger.info(f"Results saved to {output_path}")
+    logger.info(f"Results saved to {output_path}, shape: {df.shape}")
     
     logger.info("------------- FSTATS analysis complete -------------")
 
