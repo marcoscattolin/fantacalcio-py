@@ -89,22 +89,6 @@ class DataProcessor:
         
         return df
     
-    def _process_skills_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Process the Skills column, ensuring it exists and has valid values.
-        
-        Args:
-            df: Input DataFrame
-            
-        Returns:
-            DataFrame with processed Skills column
-        """
-        if "Skills" not in df.columns:
-            df["Skills"] = "[]"
-        else:
-            df["Skills"] = df["Skills"].fillna("[]")
-        
-        return df
     
     def save_parquet(self, df: pd.DataFrame, file_path: str) -> None:
         """

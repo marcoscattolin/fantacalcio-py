@@ -38,6 +38,26 @@ class FpediaDataProcessor(DataProcessor):
         logger.info("Data loading completed")
         return df
 
+    def _process_skills_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Process the Skills column, ensuring it exists and has valid values.
+        
+        Args:
+            df: Input DataFrame
+            
+        Returns:
+            DataFrame with processed Skills column
+        """
+        if "Skills" not in df.columns:
+            df["Skills"] = [[] for _ in range(len(df))]
+        else:
+           df["Skills"] = df["Skills"].str.strip("[]") \
+                           .str.replace("'", "") \
+                           .str.split(", ")
+
+        
+        return df
+    
     def process_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Process and clean FPEDIA DataFrame.
