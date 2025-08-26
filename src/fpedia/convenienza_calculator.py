@@ -4,7 +4,6 @@ Convenienza Calculator for FPEDIA data analysis.
 Calculates convenience indices for football players.
 """
 
-import ast
 import pandas as pd
 from loguru import logger
 from src.fpedia import config
@@ -26,11 +25,10 @@ class ConvenienzaCalculator:
         self.prev_year = self.current_year - 1
         self.prev_prev_year = self.current_year - 2
 
-    def _get_skills_bonus(self, skills_str: str) -> int:
+    def _get_skills_bonus(self, skills_list: list) -> int:
         """Calculate bonus from player skills."""
         try:
-            skills = ast.literal_eval(skills_str)
-            return sum(self.SKILLS_VALUES.get(skill, 0) for skill in skills) if isinstance(skills, list) else 0
+            return sum(self.SKILLS_VALUES.get(skill, 0) for skill in skills_list)
         except:
             return 0
 
@@ -67,7 +65,8 @@ class ConvenienzaCalculator:
         final_score = base_score
         
         # Skills bonus
-        final_score += self._get_skills_bonus(row.get("Skills", "[]"))
+        skills_list = row.get("Skills", [])
+        final_score += self._get_skills_bonus(skills_list)
         
         # Status modifiers
         if row.get("Nuovo acquisto", False):
@@ -114,7 +113,8 @@ class ConvenienzaCalculator:
         potenziale = []
         for _, row in df_calc.iterrows():
             score = row.get("Punteggio", 0)
-            skills_bonus = self._get_skills_bonus(row.get("Skills", "[]")) * 2
+            skills_list = row.get("Skills", [])
+            skills_bonus = self._get_skills_bonus(skills_list) * 2
             potenziale.append(score + skills_bonus)
         
         df["Convenienza Potenziale"] = potenziale
