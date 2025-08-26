@@ -38,21 +38,24 @@ class ConvenienzaCalculator:
         prev_avg = row.get(f"Fantamedia anno {self.prev_prev_year}-{self.prev_year}", 0)
         prev_matches = row.get("Partite giocate", 0)
         curr_avg = row.get(f"Fantamedia anno {self.prev_year}-{self.current_year}", 0)
-        curr_appearances = row.get("Presenze campionato corrente", 0)
+        curr_matches = row.get("Presenze campionato corrente", 0)
         score = row.get("Punteggio", 1)
         
         # Calculate base value
         base = 0.0
         
-        # Previous season (20% weight)
-        if prev_matches > 0:
-            base += prev_avg * (prev_matches / self.SEASON_MATCHES) * 0.2
+        # Determine if we have sufficient data for each season
+        has_previous_season_data = prev_matches > 0
+        has_current_season_data = curr_matches > 5
         
-        # Current season (80% weight if enough data)
-        if curr_appearances > 5:
-            base += curr_avg * (curr_appearances / max_appearances) * 0.8
-        elif prev_matches > 0:
-            base = prev_avg * (prev_matches / self.SEASON_MATCHES)
+        # Calculate season contributions
+        if has_previous_season_data and has_current_season_data:
+            prev_season_weight = (prev_matches / self.SEASON_MATCHES) * 0.2
+            curr_season_weight = (curr_matches / max_appearances) * 0.8
+            base += prev_avg * prev_season_weight
+            base += curr_avg * curr_season_weight
+        elif has_previous_season_data:
+                base = prev_avg * (prev_matches / self.SEASON_MATCHES)
         
         # Apply score multiplier and normalize
         base = base * score * 0.3
