@@ -2,7 +2,6 @@ from src.commons import config
 import os
 
 
-
 # FPEDIA
 BASEURL_FPEDIA = config.decode("aHR0cHM6Ly93d3cuZmFudGFjYWxjaW9wZWRpYS5jb20=")
 FPEDIA_URL = f"{BASEURL_FPEDIA}/lista-calciatori-serie-a/"
@@ -22,4 +21,4 @@ GIOCATORI_URLS = os.path.join(config.TEMP_DIR, "fpedia", "giocatori_urls.txt")
 PROCESSED_GIOCATORI_PARQUET = os.path.join(config.TEMP_DIR, "fpedia", "giocatori_processed.parquet")
 
 # output of pipeline
-FPEDIA_EXCEL = os.path.join(config.OUTPUT_DIR, "fpedia.xlsx")
+FPEDIA_EXCEL = os.path.join(config.OUTPUT_DIR, f"{config.NOW}_fpedia.xlsx")

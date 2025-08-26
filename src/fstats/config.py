@@ -20,5 +20,5 @@ FSTATS_LOGIN_URL = f"{BASEURL_FSTATS}/account/login/"
 FSTATS_PLAYERS_URL = f"{BASEURL_FSTATS}/v1/zona/player/?page_size=1000&page=1&season={str(FSTATS_ANNO)}%2F{str(FSTATS_ANNO+1)[-2:]}&ordering="
 
 # output of pipeline
-FSTATS_EXCEL = os.path.join(config.OUTPUT_DIR, "fstats.xlsx")
+FSTATS_EXCEL = os.path.join(config.OUTPUT_DIR, f"{config.NOW}_fstats.xlsx")
 

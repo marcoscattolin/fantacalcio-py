@@ -136,12 +136,12 @@ class ConvenienzaCalculator:
         
         return df_result
 
-    def save_excel(self, df: pd.DataFrame, sort_by: str = "Convenienza Potenziale"):
+    def save_excel(self, df: pd.DataFrame, sort_by: str = ["Ruolo", "Convenienza Potenziale"], ascending: bool = [True, False]):
         
         """Save results to Excel with selected columns."""
         
         # Sort by potential convenience
-        df_sorted = df.sort_values(by=sort_by, ascending=False)
+        df_sorted = df.sort_values(by=sort_by, ascending=ascending)
         
         # Define output columns in logical groups
         output_columns = [
