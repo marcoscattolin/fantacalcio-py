@@ -147,7 +147,9 @@ class ConvenienzaCalculator:
             f"FM su tot gare {self.prev_year}-{self.current_year}",
             "Presenze previste", "Gol previsti", "Assist previsti",
             # Status
-            "Nuovo acquisto"
+            "Nuovo acquisto", 
+            # URL
+            "URL",
         ]
         
         # Filter to existing columns only

@@ -253,6 +253,7 @@ class Scraper:
                 "Infortunato": infortunato,
                 "Trend": trend,
                 "Skills": skills,
+                "URL": url,
             }
             
             # Add fantamedia data
