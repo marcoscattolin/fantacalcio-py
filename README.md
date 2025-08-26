@@ -38,10 +38,10 @@ Il file `config.py` contiene altre configurazioni, come gli URL per lo scraping 
 
 ## Avvio del Progetto
 
-Per avviare l'analisi completa, settare PYTHONPATH
+Per avviare l'analisi completa, settare PYTHONPATH, (per es.)
 
 ```bash
-
+$env:PYTHONPATH = "C:\Users\Scattolin Marco\repos\PERSONAL_REPOS\fantacalcio-py\"
 ```
 
 ed eseguire lo script `main.py` utilizzando `uv`.
