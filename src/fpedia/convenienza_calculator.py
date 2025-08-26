@@ -132,16 +132,21 @@ class ConvenienzaCalculator:
         
         # Define output columns (no duplicates)
         output_columns = [
+            # Essential Info
             "Nome", "Ruolo", "Squadra",
             "Convenienza Potenziale", "Convenienza", "Punteggio",
+            # Performance Metrics
             f"Fantamedia anno {self.prev_year}-{self.current_year}",
             "Presenze campionato corrente",
             f"Fantamedia anno {self.prev_prev_year}-{self.prev_year}",
             "Partite giocate",
+            # Status
             "Trend", "Skills", "Consigliato prossima giornata",
             "Buon investimento", "Resistenza infortuni", "Infortunato",
+            # Performance Indices
             f"FM su tot gare {self.prev_year}-{self.current_year}",
             "Presenze previste", "Gol previsti", "Assist previsti",
+            # Status
             "Nuovo acquisto"
         ]
         

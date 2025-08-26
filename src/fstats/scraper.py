@@ -11,7 +11,7 @@ from loguru import logger
 from dotenv import load_dotenv
 import pandas as pd
 
-from src import config
+from src.fstats import config
 
 load_dotenv()
 

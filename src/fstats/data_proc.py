@@ -1,7 +1,7 @@
 from src.commons.data_proc import DataProcessor
 from loguru import logger
 import pandas as pd
-from src import config
+from src.fstats import config
 
 
 class FstatsDataProcessor(DataProcessor):
@@ -16,7 +16,7 @@ class FstatsDataProcessor(DataProcessor):
         logger.info("Starting data loading process...")
         
         
-        df = self._load_dataframe(
+        df = super().load_csv(
             config.PLAYERS_CSV, 
             "FSTATS", 
             sep=";"
