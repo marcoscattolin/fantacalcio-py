@@ -15,6 +15,8 @@ dependencies = [
     "requests>=2.32.4",
     "openpyxl>=3.1.5",
     "python-dotenv>=1.1.1",
+    "pyarrow>=21.0.0",
+    "fastparquet>=2024.11.0",
 ]
 
 [project.optional-dependencies]
