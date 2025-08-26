@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import concurrent.futures
 
-from src import config
+from src.fpedia import config
 
 load_dotenv()
 
@@ -131,9 +131,9 @@ class Scraper:
    
     def _get_player_urls(self) -> List[str]:
         """Scrape all player URLs from FPEDIA."""
-        if os.path.exists(config.GIOCATORI_URLS_FILE):
+        if os.path.exists(config.GIOCATORI_URLS):
             logger.debug("Reading player URLs from cache.")
-            with open(config.GIOCATORI_URLS_FILE, "r", encoding="utf-8") as fp:
+            with open(config.GIOCATORI_URLS, "r", encoding="utf-8") as fp:
                 return [url.strip() for url in fp.readlines()]
         
         logger.debug("Scraping player URLs from FPEDIA...")
@@ -151,8 +151,8 @@ class Scraper:
             return []
         
         # Save URLs to cache
-        os.makedirs(os.path.dirname(config.GIOCATORI_URLS_FILE), exist_ok=True)
-        with open(config.GIOCATORI_URLS_FILE, "w", encoding="utf-8") as fp:
+        os.makedirs(os.path.dirname(config.GIOCATORI_URLS), exist_ok=True)
+        with open(config.GIOCATORI_URLS, "w", encoding="utf-8") as fp:
             for url in all_urls:
                 fp.write(f"{url}\n")
         
@@ -253,6 +253,7 @@ class Scraper:
                 "Infortunato": infortunato,
                 "Trend": trend,
                 "Skills": skills,
+                "URL": url,
             }
             
             # Add fantamedia data

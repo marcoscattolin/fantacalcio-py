@@ -9,13 +9,12 @@ import pandas as pd
 from loguru import logger
 from typing import List
 from pathlib import Path
-from src import config
 
 
 class DataProcessor:
     """Main class for processing data from different sources."""
     
-    def _load_dataframe(
+    def load_csv(
         self, 
         file_path: str, 
         source_name: str, 
@@ -52,6 +51,12 @@ class DataProcessor:
             logger.error(f"Unexpected error loading {source_name} file {file_path}: {e}")
             return pd.DataFrame()
     
+    def load_parquet(self, file_path: str) -> pd.DataFrame:
+        """
+        Load a PARQUET file into a DataFrame.
+        """
+        return pd.read_parquet(file_path)
+
     def _is_file_valid(self, file_path: Path) -> bool:
         """
         Check if a file exists and is not empty.
@@ -84,20 +89,14 @@ class DataProcessor:
         
         return df
     
-    def _process_skills_column(self, df: pd.DataFrame) -> pd.DataFrame:
+    
+    def save_parquet(self, df: pd.DataFrame, file_path: str) -> None:
         """
-        Process the Skills column, ensuring it exists and has valid values.
+        Save a DataFrame to a PARQUET file.
         
         Args:
             df: Input DataFrame
-            
-        Returns:
-            DataFrame with processed Skills column
+            file_path: Path to the PARQUET file
         """
-        if "Skills" not in df.columns:
-            df["Skills"] = "[]"
-        else:
-            df["Skills"] = df["Skills"].fillna("[]")
-        
-        return df
+        df.to_parquet(file_path, index=False)
     
