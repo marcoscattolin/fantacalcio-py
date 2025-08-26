@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.12.2
+    hooks:
+      # Run the linter.
+      - id: ruff
+        language: system # use the installed version of ruff
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
+        language: system # use the installed version of ruff
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=50000'] # allow up to 50MB
+      - id: check-json
+      - id: check-yaml
+        args: ["--unsafe"] # needed to allow custom tags from gamma-config in yaml
+      - id: check-merge-conflict
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+  
