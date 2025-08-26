@@ -132,7 +132,7 @@ class ConvenienzaCalculator:
         df_result = self._calculate_convenienza_potenziale(df_result)
         
         # Fill missing values
-        df_result.fillna({"Convenienza": 0, "Convenienza Potenziale": 0}, inplace=True)
+        df_result = df_result.fillna({"Convenienza": 0, "Convenienza Potenziale": 0})
         
         return df_result
 
