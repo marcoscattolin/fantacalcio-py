@@ -1,7 +1,7 @@
 from src.commons.data_proc import DataProcessor
 from loguru import logger
 import pandas as pd
-from src import config
+from src.fpedia import config
 
 
 NUMERIC_COLS = [
@@ -20,7 +20,7 @@ NUMERIC_COLS = [
 
 class FpediaDataProcessor(DataProcessor):
 
-    def load_dataframe(self) -> pd.DataFrame:
+    def load_csv(self) -> pd.DataFrame:
         """
         Load CSV files into pandas DataFrames with error handling.
         
@@ -29,7 +29,7 @@ class FpediaDataProcessor(DataProcessor):
         """
         logger.info("Starting data loading process...")
         
-        df = self._load_dataframe(
+        df = super().load_csv(
             config.GIOCATORI_CSV, 
             "FPEDIA", 
             sep=","
